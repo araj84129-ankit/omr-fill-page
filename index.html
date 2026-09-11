@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Online OMR Answer Sheet</title>
+
+    <!--
+        html2canvas:
+        पूरी OMR sheet को image बनाकर download करने के लिए
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+    <style>
+
+        /* =========================
+           BASIC RESET
+        ========================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            padding: 12px;
+
+            background: #e8edf1;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+
+        /* =========================
+           TOP BUTTONS
+        ========================= */
+
+        .top-buttons {
+
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto 12px;
+
+            display: flex;
+
+            gap: 10px;
+        }
+
+
+        button {
+
+            border: none;
+
+            border-radius: 7px;
+
+            padding: 12px 18px;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            touch-action: manipulation;
+        }
+
+
+        .download {
+
+            background: #087f23;
+
+            flex: 1;
+        }
+
+
+        .clear {
+
+            background: #c62828;
+
+            flex: 1;
+        }
+
+
+        button:active {
+
+            transform: scale(0.97);
+        }
+
+
+        /* =========================
+           OMR SHEET
+        ========================= */
+
+        .sheet {
+
+            width: 100%;
+
+            max-width: 900px;
+
+            margin: 0 auto;
+
+            padding: 18px;
+
+            background: white;
+
+            border: 3px solid #d71920;
+
+            border-radius: 3px;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .field {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            color: #d71920;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+
+        .field label {
+
+            white-space: nowrap;
+        }
+
+
+        .field input {
+
+            width: 100%;
+
+            height: 32px;
+
+            border: 1px solid #999;
+
+            border-radius: 2px;
+
+            padding: 5px 8px;
+
+            font-size: 15px;
+
+            outline: none;
+
+            background: white;
+        }
+
+
+        .field input:focus {
+
+            border-color: #1677ff;
+        }
+
+
+        /* =========================
+           RESULT BOXES
+        ========================= */
+
+        .three-fields {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 10px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .three-fields .field input {
+
+            background: #f5f5f5;
+
+            font-weight: bold;
+
+            color: #222;
+        }
+
+
+        /* =========================
+           QUESTIONS
+        ========================= */
+
+        .questions {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 7px;
+        }
+
+
+        .column {
+
+            border: 1px solid #d71920;
+
+            padding: 4px;
+        }
+
+
+        /* =========================
+           SINGLE QUESTION
+        ========================= */
+
+        .question {
+
+            display: flex;
+
+            align-items: center;
+
+            min-height: 31px;
+
+            border-bottom:
+                1px dotted #d5d5d5;
+        }
+
+
+        .question:last-child {
+
+            border-bottom: none;
+        }
+
+
+        /* =========================
+           QUESTION NUMBER
+        ========================= */
+
+        .number {
+
+            width: 34px;
+
+            min-width: 34px;
+
+            color: #d71920;
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            text-align: left;
+        }
+
+
+        /* =========================
+           OPTIONS
+        ========================= */
+
+        .options {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+        }
+
+
+        .option {
+
+            width: 25px;
+
+            height: 25px;
+
+            min-width: 25px;
+
+            border: 1.5px solid #888;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            color: #444;
+
+            background: white;
+
+            font-size: 11px;
+
+            font-weight: normal;
+
+            cursor: pointer;
+
+            user-select: none;
+
+            -webkit-user-select: none;
+
+            touch-action: manipulation;
+
+            transition:
+                background 0.12s,
+                border 0.12s,
+                color 0.12s;
+        }
+
+
+        .option:hover {
+
+            border-color: #1677ff;
+
+            background: #eef6ff;
+        }
+
+
+        /* =========================
+           SELECTED OPTION
+        ========================= */
+
+        .option.selected {
+
+            background: #087f23;
+
+            border-color: #087f23;
+
+            color: white;
+
+            font-size: 0;
+
+            font-weight: bold;
+        }
+
+
+        .option.selected::after {
+
+            content: "✓";
+
+            font-size: 17px;
+
+            line-height: 1;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .footer {
+
+            margin-top: 15px;
+
+            padding-top: 8px;
+
+            border-top: 1px solid #ddd;
+
+            text-align: center;
+
+            color: #777;
+
+            font-size: 11px;
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            body {
+
+                padding: 6px;
+            }
+
+
+            .top-buttons {
+
+                position: sticky;
+
+                top: 0;
+
+                z-index: 1000;
+
+                padding: 5px 0;
+
+                background: #e8edf1;
+            }
+
+
+            button {
+
+                padding: 11px 5px;
+
+                font-size: 13px;
+            }
+
+
+            .sheet {
+
+                padding: 7px;
+
+                border-width: 2px;
+            }
+
+
+            .header {
+
+                grid-template-columns: 1fr;
+
+                gap: 8px;
+            }
+
+
+            .three-fields {
+
+                grid-template-columns: 1fr;
+
+                gap: 6px;
+            }
+
+
+            .questions {
+
+                grid-template-columns: 1fr;
+
+                gap: 5px;
+            }
+
+
+            .column {
+
+                padding: 3px;
+            }
+
+
+            .question {
+
+                min-height: 31px;
+            }
+
+
+            .number {
+
+                width: 35px;
+
+                min-width: 35px;
+            }
+
+
+            .option {
+
+                width: 27px;
+
+                height: 27px;
+
+                min-width: 27px;
+
+                font-size: 12px;
+            }
+
+
+            .option.selected::after {
+
+                font-size: 18px;
+            }
+        }
+
+
+        /* =========================
+           PRINT
+        ========================= */
+
+        @media print {
+
+            body {
+
+                background: white;
+
+                padding: 0;
+            }
+
+
+            .top-buttons {
+
+                display: none;
+            }
+
+
+            .sheet {
+
+                max-width: 100%;
+
+                border: 2px solid #d71920;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         BUTTONS
+    ========================= -->
+
+    <div class="top-buttons">
+
+        <button
+            class="download"
+            onclick="downloadSheet()"
+        >
+            📥 Photo Download
+        </button>
+
+
+        <button
+            class="clear"
+            onclick="clearAll()"
+        >
+            🗑️ Clear All
+        </button>
+
+    </div>
+
+
+
+    <!-- =========================
+         OMR SHEET
+    ========================= -->
+
+    <div
+        id="omrSheet"
+        class="sheet"
+    >
+
+
+        <!-- =========================
+             NAME / DATE
+        ========================= -->
+
+        <div class="header">
+
+
+            <div class="field">
+
+                <label for="studentName">
+                    Name
+                </label>
+
+                <input
+                    id="studentName"
+                    type="text"
+                    placeholder="Apna naam likhein"
+                    autocomplete="name"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="examDate">
+                    Date
+                </label>
+
+                <input
+                    id="examDate"
+                    type="date"
+                >
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =========================
+             STATS
+        ========================= -->
+
+        <div class="three-fields">
+
+
+            <div class="field">
+
+                <label for="attempt">
+                    Total Attempt
+                </label>
+
+                <input
+                    id="attempt"
+                    type="number"
+                    value="0"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="wrong">
+                    Wrong
+                </label>
+
+                <input
+                    id="wrong"
+                    type="number"
+                    value="0"
+                    readonly
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="marks">
+                    Total Marks
+                </label>
+
+                <input
+                    id="marks"
+                    type="number"
+                    value="0"
+                    readonly
+                >
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =========================
+             QUESTIONS
+        ========================= -->
+
+        <div
+            id="questions"
+            class="questions"
+        ></div>
+
+
+
+        <div class="footer">
+
+            Online OMR Answer Sheet
+            • Blank questions are allowed
+
+        </div>
+
+
+    </div>
+
+
+
+    <script>
+
+
+        /* ==================================================
+           SETTINGS
+        ================================================== */
+
+
+        // Total questions
+        const TOTAL_QUESTIONS = 150;
+
+
+        // Har correct answer ke marks
+        const MARKS_PER_QUESTION = 1;
+
+
+        // LocalStorage ka naam
+        const STORAGE_KEY =
+            "online_omr_150_answers";
+
+
+        /* ==================================================
+           ANSWER KEY
+           
+           Yahan correct answers daal sakte hain.
+
+           Example:
+
+           1: "A",
+           2: "B",
+           3: "C",
+           4: "D",
+
+           Agar kisi question ka answer nahi diya gaya
+           to us question ka Wrong calculate nahi hoga.
+        ================================================== */
+
+
+        const answerKey = {
+
+            /*
+                Example:
+
+                1: "A",
+                2: "C",
+                3: "B",
+                4: "D",
+
+            */
+
+        };
+
+
+
+        /* ==================================================
+           HTML ELEMENTS
+        ================================================== */
+
+
+        const questionsContainer =
+            document.getElementById("questions");
+
+
+        const nameInput =
+            document.getElementById("studentName");
+
+
+        const dateInput =
+            document.getElementById("examDate");
+
+
+        const attemptInput =
+            document.getElementById("attempt");
+
+
+        const wrongInput =
+            document.getElementById("wrong");
+
+
+        const marksInput =
+            document.getElementById("marks");
+
+
+
+        /* ==================================================
+           QUESTIONS CREATE
+        ================================================== */
+
+
+        function createQuestions() {
+
+
+            questionsContainer.innerHTML = "";
+
+
+            // 3 columns
+            const columns = [];
+
+
+            for (
+                let i = 0;
+                i < 3;
+                i++
+            ) {
+
+                const column =
+                    document.createElement("div");
+
+
+                column.className =
+                    "column";
+
+
+                columns.push(column);
+
+
+                questionsContainer.appendChild(
+                    column
+                );
+
+            }
+
+
+
+            /*
+                Column 1 = 1-50
+                Column 2 = 51-100
+                Column 3 = 101-150
+            */
+
+
+            for (
+                let columnIndex = 0;
+                columnIndex < 3;
+                columnIndex++
+            ) {
+
+
+                const start =
+                    columnIndex * 50 + 1;
+
+
+                const end =
+                    start + 49;
+
+
+
+                for (
+                    let q = start;
+                    q <= end;
+                    q++
+                ) {
+
+
+                    // Question row
+                    const question =
+                        document.createElement("div");
+
+
+                    question.className =
+                        "question";
+
+
+
+                    // Number
+                    const number =
+                        document.createElement("div");
+
+
+                    number.className =
+                        "number";
+
+
+                    number.textContent =
+                        q;
+
+
+
+                    // Options container
+                    const options =
+                        document.createElement("div");
+
+
+                    options.className =
+                        "options";
+
+
+
+                    // A B C D
+                    ["A", "B", "C", "D"]
+                    .forEach(letter => {
+
+
+                        const option =
+                            document.createElement("div");
+
+
+                        option.className =
+                            "option";
+
+
+                        option.dataset.question =
+                            q;
+
+
+                        option.dataset.answer =
+                            letter;
+
+
+                        option.textContent =
+                            letter;
+
+
+
+                        /*
+                            CLICK EVENT
+                        */
+
+                        option.addEventListener(
+                            "click",
+                            function() {
+
+                                selectAnswer(
+                                    q,
+                                    letter
+                                );
+
+                            }
+                        );
+
+
+
+                        options.appendChild(
+                            option
+                        );
+
+                    });
+
+
+
+                    question.appendChild(
+                        number
+                    );
+
+
+                    question.appendChild(
+                        options
+                    );
+
+
+                    columns[columnIndex]
+                        .appendChild(
+                            question
+                        );
+
+                }
+
+            }
+
+        }
+
+
+
+        /* ==================================================
+           SELECT / CLEAR ANSWER
+
+           IMPORTANT:
+
+           Same selected option ko dobara click karne par
+           uska tick CLEAR ho jayega.
+        ================================================== */
+
+
+        function selectAnswer(
+            questionNumber,
+            answer
+        ) {
+
+
+            // Is question ke saare options
+            const options =
+                document.querySelectorAll(
+                    `.option[data-question="${questionNumber}"]`
+                );
+
+
+
+            // Jis option par click hua
+            const clickedOption =
+                document.querySelector(
+                    `.option[data-question="${questionNumber}"][data-answer="${answer}"]`
+                );
+
+
+
+            if (!clickedOption) {
+                return;
+            }
+
+
+
+            /*
+                ---------------------------------------
+                CASE 1:
+                Same option already selected hai.
+
+                Dobara click = CLEAR
+                ---------------------------------------
+            */
+
+
+            if (
+                clickedOption.classList.contains(
+                    "selected"
+                )
+            ) {
+
+
+                clickedOption.classList.remove(
+                    "selected"
+                );
+
+
+            }
+
+
+            /*
+                ---------------------------------------
+                CASE 2:
+                Naya option select karna hai.
+                
+                Pehle purana tick clear karo,
+                phir naya tick lagao.
+                ---------------------------------------
+            */
+
+
+            else {
+
+
+                options.forEach(option => {
+
+                    option.classList.remove(
+                        "selected"
+                    );
+
+                });
+
+
+                clickedOption.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+
+            // Stats update
+            updateStats();
+
+
+            // Data save
+            saveData();
+
+        }
+
+
+
+        /* ==================================================
+           GET SELECTED ANSWERS
+        ================================================== */
+
+
+        function getAnswers() {
+
+
+            const answers = {};
+
+
+            document
+                .querySelectorAll(
+                    ".option.selected"
+                )
+                .forEach(option => {
+
+
+                    const question =
+                        option.dataset.question;
+
+
+                    const answer =
+                        option.dataset.answer;
+
+
+                    answers[question] =
+                        answer;
+
+                });
+
+
+            return answers;
+
+        }
+
+
+
+        /* ==================================================
+           UPDATE STATS
+        ================================================== */
+
+
+        function updateStats() {
+
+
+            const selected =
+                document.querySelectorAll(
+                    ".option.selected"
+                );
+
+
+
+            // Total Attempt
+            const attempted =
+                selected.length;
+
+
+            attemptInput.value =
+                attempted;
+
+
+
+            // Wrong
+            let wrong = 0;
+
+
+            selected.forEach(option => {
+
+
+                const question =
+                    Number(
+                        option.dataset.question
+                    );
+
+
+                const answer =
+                    option.dataset.answer;
+
+
+
+                /*
+                    Sirf wahi question wrong hoga
+                    jiska answerKey available hai.
+                */
+
+
+                if (
+                    answerKey[question] &&
+                    answerKey[question] !== answer
+                ) {
+
+                    wrong++;
+
+                }
+
+            });
+
+
+
+            wrongInput.value =
+                wrong;
+
+
+
+            // Correct
+            let correct =
+                attempted - wrong;
+
+
+            if (correct < 0) {
+                correct = 0;
+            }
+
+
+
+            // Marks
+            marksInput.value =
+                correct *
+                MARKS_PER_QUESTION;
+
+        }
+
+
+
+        /* ==================================================
+           SAVE DATA
+
+           Browser me automatically save hoga.
+        ================================================== */
+
+
+        function saveData() {
+
+
+            const data = {
+
+                name:
+                    nameInput.value,
+
+                date:
+                    dateInput.value,
+
+                answers:
+                    getAnswers()
+
+            };
+
+
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(data)
+            );
+
+        }
+
+
+
+        /* ==================================================
+           LOAD SAVED DATA
+        ================================================== */
+
+
+        function loadData() {
+
+
+            const saved =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+
+            if (!saved) {
+                return;
+            }
+
+
+
+            try {
+
+
+                const data =
+                    JSON.parse(saved);
+
+
+
+                // Name
+                if (data.name) {
+
+                    nameInput.value =
+                        data.name;
+
+                }
+
+
+
+                // Date
+                if (data.date) {
+
+                    dateInput.value =
+                        data.date;
+
+                }
+
+
+
+                // Answers
+                if (data.answers) {
+
+
+                    Object.entries(
+                        data.answers
+                    ).forEach(
+                        ([question, answer]) => {
+
+
+                            const option =
+                                document.querySelector(
+                                    `.option[data-question="${question}"][data-answer="${answer}"]`
+                                );
+
+
+                            if (option) {
+
+                                option.classList.add(
+                                    "selected"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+
+                updateStats();
+
+
+            }
+            catch (error) {
+
+                console.log(
+                    "Saved data load error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+
+        /* ==================================================
+           NAME / DATE AUTO SAVE
+        ================================================== */
+
+
+        nameInput.addEventListener(
+            "input",
+            saveData
+        );
+
+
+        dateInput.addEventListener(
+            "change",
+            saveData
+        );
+
+
+
+        /* ==================================================
+           CLEAR ALL
+        ================================================== */
+
+
+        function clearAll() {
+
+
+            const confirmClear =
+                confirm(
+                    "Kya aap saare answers clear karna chahte hain?"
+                );
+
+
+            if (!confirmClear) {
+                return;
+            }
+
+
+
+            // Saare ticks hatao
+            document
+                .querySelectorAll(
+                    ".option.selected"
+                )
+                .forEach(option => {
+
+                    option.classList.remove(
+                        "selected"
+                    );
+
+                });
+
+
+
+            // Name bhi clear karna hai
+            nameInput.value = "";
+
+
+            // Date bhi clear
+            dateInput.value = "";
+
+
+
+            // Stats reset
+            attemptInput.value = 0;
+
+            wrongInput.value = 0;
+
+            marksInput.value = 0;
+
+
+
+            // Saved data delete
+            localStorage.removeItem(
+                STORAGE_KEY
+            );
+
+        }
+
+
+
+        /* ==================================================
+           DOWNLOAD SHEET AS PHOTO
+        ================================================== */
+
+
+        async function downloadSheet() {
+
+
+            const downloadButton =
+                document.querySelector(
+                    ".download"
+                );
+
+
+            const originalText =
+                downloadButton.textContent;
+
+
+
+            downloadButton.textContent =
+                "⏳ Photo bana raha hai...";
+
+
+            downloadButton.disabled =
+                true;
+
+
+
+            try {
+
+
+                /*
+                    html2canvas se sheet capture
+                */
+
+
+                const canvas =
+                    await html2canvas(
+                        document.getElementById(
+                            "omrSheet"
+                        ),
+                        {
+
+                            scale: 2,
+
+                            backgroundColor:
+                                "#ffffff",
+
+                            useCORS: true,
+
+                            logging: false
+
+                        }
+                    );
+
+
+
+                /*
+                    Canvas ko PNG image
+                */
+
+
+                const image =
+                    canvas.toDataURL(
+                        "image/png",
+                        1.0
+                    );
+
+
+
+                /*
+                    File name
+                */
+
+
+                let name =
+                    nameInput.value.trim();
+
+
+                if (!name) {
+
+                    name = "OMR";
+
+                }
+
+
+
+                // File name safe banana
+                name =
+                    name.replace(
+                        /[^a-zA-Z0-9_-]/g,
+                        "_"
+                    );
+
+
+
+                const fileName =
+                    name +
+                    "_OMR_Answer_Sheet.png";
+
+
+
+                /*
+                    Download link
+                */
+
+
+                const link =
+                    document.createElement(
+                        "a"
+                    );
+
+
+                link.download =
+                    fileName;
+
+
+                link.href =
+                    image;
+
+
+                document.body.appendChild(
+                    link
+                );
+
+
+                link.click();
+
+
+                document.body.removeChild(
+                    link
+                );
+
+
+            }
+            catch (error) {
+
+
+                console.error(
+                    "Download Error:",
+                    error
+                );
+
+
+                alert(
+                    "Photo download nahi ho paya. Please dobara try karein."
+                );
+
+            }
+
+
+
+            downloadButton.textContent =
+                originalText;
+
+
+            downloadButton.disabled =
+                false;
+
+        }
+
+
+
+        /* ==================================================
+           INITIALIZE
+        ================================================== */
+
+
+        // Pehle 150 questions create
+        createQuestions();
+
+
+        // Saved answers load
+        loadData();
+
+
+        // Agar saved data nahi tha
+        if (!attemptInput.value) {
+
+            attemptInput.value = 0;
+
+        }
+
+
+        if (!wrongInput.value) {
+
+            wrongInput.value = 0;
+
+        }
+
+
+        if (!marksInput.value) {
+
+            marksInput.value = 0;
+
+        }
+
+
+    </script>
+
+
+</body>
+</html>
